@@ -1,0 +1,41 @@
+#version 430 core
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+	
+// images 
+layout(rgba32f, binding = 0) uniform image2D imgInput;
+layout(rgba32f, binding = 1) uniform image2D imgOutput;
+	
+void main() {
+    ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+	vec4 nw = imageLoad(imgInput, texelCoord + ivec2(-1,1));
+	vec4 n = imageLoad(imgInput, texelCoord + ivec2(0,1));
+	vec4 ne = imageLoad(imgInput, texelCoord + ivec2(1,1));
+	vec4 e = imageLoad(imgInput, texelCoord+ ivec2(1,0));
+	vec4 w = imageLoad(imgInput, texelCoord+ ivec2(-1,0));
+	vec4 s = imageLoad(imgInput, texelCoord+ ivec2(0,-1));
+	vec4 se = imageLoad(imgInput, texelCoord+ ivec2(1,-1));
+	vec4 sw = imageLoad(imgInput, texelCoord+ ivec2(-1,-1));
+	vec4 c = imageLoad(imgInput, texelCoord);
+	vec4 counts = nw + n + ne + e + w + s + se + sw;
+	
+	vec4 value = vec4(0,0,0,0);
+	if( counts.r == 2 || counts.r == 3)
+		value.r = 1.0;
+	else
+		value.r = 0.0;
+		
+	if( counts.g == 2 || counts.g == 3)
+		value.g = 1.0;
+	else
+		value.g = 0.0;
+		
+	if( counts.b == 2 || counts.b == 3)
+		value.b = 1.0;
+	else
+		value.b = 0.0;
+		
+		value.a = 1;
+	
+    imageStore(imgOutput, texelCoord, value);
+}
